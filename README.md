@@ -38,7 +38,7 @@ It should also build and run on other target boards supported by Yocto. If you u
 To enable the library in your build image (and optionally the tests) add this layer to your `conf/bblayers.conf`
 
 ```
-BSPLAYERS += " \
+BBLAYERS += " \
   ${OEROOT}/layers/meta-quantum-safe \
 "
 ```
@@ -46,12 +46,21 @@ BSPLAYERS += " \
 Then add the `liboqs` recipe to your image.
 
 ```
-CORE_IMAGE_BASE_INSTALL += " \
-   liboqs \
-"
+IMAGE_INSTALL:append = " liboqs"
+```
+
+If you use the provided Sato-based sample images (e.g. `core-image-qs.bb`), ensure your build includes the `meta-sato` layer (it is part of Poky, but may not be enabled in minimal setups).
+
+`liboqs` OpenSSL support is controlled via `PACKAGECONFIG`:
+
+```
+# Disable OpenSSL support (minimal builds)
+PACKAGECONFIG:pn-liboqs = ""
 ```
 
 You can also add the `liboqs` package tests which will run the tests from upstream on the device. To do this you'll need to enable ptest support in your build and include the `liboqs-ptest` package. Something like this:
+
+Note: the `liboqs-ptest` runtime dependencies (pytest, etc.) are typically provided by `meta-openembedded` (notably `meta-python`), so ensure those layers are enabled if you want to run ptests.
 
 Set `IMAGE_CLASSES` in your `local.conf`
 

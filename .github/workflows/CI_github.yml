@@ -18,7 +18,7 @@ jobs:
       options: --privileged --platform linux/amd64  -v /dev/net/tun:/dev/net/tun -v /dev/kvm:/dev/kvm
     strategy:
       matrix:
-        liboqs_version: [git]
+        liboqs_version: [0.10.1, git]
         branch: [scarthgap]
         arch: [x86-64, arm64]
     env:

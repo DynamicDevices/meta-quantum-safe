@@ -12,25 +12,30 @@ SRC_URI = "git://github.com/${ORG}/liboqs.git;protocol=https;branch=${BRANCH} \
            file://01-check-installed-library.patch \
 "
 
-EXTRA_OECMAKE = " -DBUILD_SHARED_LIBS=ON -DOQS_DIST_BUILD=OFF -DOQS_DLOPEN_OPENSSL=OFF -DOQS_USE_OPENSSL=ON"
+PACKAGECONFIG ??= "openssl"
+PACKAGECONFIG[openssl] = "-DOQS_USE_OPENSSL=ON -DOQS_DLOPEN_OPENSSL=OFF,-DOQS_USE_OPENSSL=OFF,,openssl"
+
+EXTRA_OECMAKE = " -DBUILD_SHARED_LIBS=ON -DOQS_DIST_BUILD=OFF"
+EXTRA_OECMAKE:append = " ${@bb.utils.contains('PACKAGECONFIG', 'openssl', '-DOQS_USE_OPENSSL=ON -DOQS_DLOPEN_OPENSSL=OFF', '-DOQS_USE_OPENSSL=OFF', d)}"
 
 S = "${WORKDIR}/git"
 
-DEPENDS = "openssl"
+DEPENDS += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', 'openssl', '', d)}"
 
 inherit pkgconfig cmake ptest
 
 PTEST_ENABLED = "1"
 
 do_install_ptest() {
-    mkdir ${D}/${PTEST_PATH}/build
-    cp ${WORKDIR}/run-ptest ${D}/${PTEST_PATH}
-    cp -r ${B}/include ${D}/${PTEST_PATH}/build/include
-    cp -r ${S}/src ${D}/${PTEST_PATH}/src
-    cp -r ${S}/docs ${D}/${PTEST_PATH}/docs
-    cp -r ${S}/scripts ${D}/${PTEST_PATH}/scripts
-    cp -r ${S}/tests ${D}/${PTEST_PATH}/tests
-    cp -r ${B}/tests ${D}/${PTEST_PATH}/build/tests
+    install -d ${D}${PTEST_PATH} ${D}${PTEST_PATH}/build
+    install -m 0755 ${WORKDIR}/run-ptest ${D}${PTEST_PATH}/run-ptest
+
+    cp -r --no-preserve=ownership ${B}/include ${D}${PTEST_PATH}/build/
+    cp -r --no-preserve=ownership ${S}/src ${D}${PTEST_PATH}/
+    cp -r --no-preserve=ownership ${S}/docs ${D}${PTEST_PATH}/
+    cp -r --no-preserve=ownership ${S}/scripts ${D}${PTEST_PATH}/
+    cp -r --no-preserve=ownership ${S}/tests ${D}${PTEST_PATH}/
+    cp -r --no-preserve=ownership ${B}/tests ${D}${PTEST_PATH}/build/
 }
 
-RDEPENDS:${PN}-ptest += "bash python3 python3-pytest python3-pytest-xdist binutils"
+RDEPENDS:${PN}-ptest += "bash python3 python3-pyyaml python3-pytest python3-pytest-forked python3-pytest-xdist binutils"
