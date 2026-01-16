@@ -20,7 +20,7 @@ jobs:
       options: --privileged --platform linux/amd64  -v /dev/net/tun:/dev/net/tun -v /dev/kvm:/dev/kvm
     strategy:
       matrix:
-        liboqs_version: [0.10.1, git]
+        liboqs_version: [0.10.1, 0.15.0, git]
         arch: [x86-64, arm64]
     env:
       name: build-and-test
