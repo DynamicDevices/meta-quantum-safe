@@ -16,7 +16,8 @@ jobs:
     runs-on: [self-hosted, linux, X64]
     timeout-minutes: 600
     container:
-      image: dynamicdevices/yocto-ci-build:latest
+      # Pinned to an immutable digest to avoid CI drift
+      image: dynamicdevices/yocto-ci-build@sha256:be170373625e77a6235a0bb3efb84d00be736221782d5d716e88aafd1b965794
       options: --privileged --platform linux/amd64  -v /dev/net/tun:/dev/net/tun -v /dev/kvm:/dev/kvm
     strategy:
       matrix:
@@ -152,7 +153,10 @@ PY
           ./${{ env.WORKDIR }}/build/conf/local.conf
           ./${{ env.WORKDIR }}/build/conf/bblayers.conf
           ./${{ env.WORKDIR }}/build/tmp/log/**
-          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.*
+          ./${{ env.WORKDIR }}/build/tmp/**/console-latest.log
+          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/run.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.task_order
     - name: Store test logs
       uses: actions/upload-artifact@v4
       if: always()
