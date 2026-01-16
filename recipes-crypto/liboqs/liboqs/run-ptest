@@ -2,12 +2,10 @@
 
 python3 -m pytest --verbose --numprocesses=auto -t 2000 --ignore=scripts/copy_from_upstream/repos
 
-if [ $? -eq 0 ]; then
-    echo "PASS: liboqs $?"
-    exit 0
+rc=$?
+if [ $rc -eq 0 ]; then
+    echo "PASS: liboqs"
 else
-    echo "PASS: liboqs $?"
-    exit 0
-#    echo "FAIL: liboqs"
-#    exit -1
+    echo "FAIL: liboqs"
 fi
+exit $rc

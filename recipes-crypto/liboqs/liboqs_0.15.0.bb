@@ -1,8 +1,9 @@
 require liboqs.inc
 
 ORG="open-quantum-safe"
+# Upstream 0.15.0 is tagged on main (no standard 0.15.0-release branch)
 BRANCH="main"
-SRCREV = "5afca642057faa54878cf6937b46fe6f00b45646"
+SRCREV = "97f6b86b1b6d109cfd43cf276ae39c2e776aed80"
 
 LICENSE:append = " & BSD-3-Clause"
 LIC_FILES_CHKSUM = " \

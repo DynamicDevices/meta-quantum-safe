@@ -6,10 +6,26 @@ A Yocto layer to start exploring the world of quantum safe cryptography
 
 | Branch | Support Status* | Status of Build & Tests |
 | ------ | --------------- | ----------------------- |
-| scarthgap | 	Long Term Support (until Apr. 2028) | [![scarthgap](https://img.shields.io/github/actions/workflow/status/dynamicdevices/meta-quantum-safe/CI_github.yml?branch=main&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml) |
-| kirkstone | 	Long Term Support (minimum Apr. 2026)	 | [![master](https://img.shields.io/github/actions/workflow/status/dynamicdevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml) |
+| main | Integration branch (builds scarthgap) | [![main](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=main&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Amain) |
+| kirkstone | Long Term Support (LTS) | [![kirkstone](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Akirkstone) |
+| scarthgap | Long Term Support (until Apr. 2028) | [![scarthgap](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=scarthgap&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Ascarthgap) |
+| whinlatter | Supported (non-LTS) | [![whinlatter](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=whinlatter&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Awhinlatter) |
 
 *support status as of 14/09/24, follows main Yocto release support schedule [here](https://wiki.yoctoproject.org/wiki/Releases)
+
+## NIST Standards
+
+We're particularly interested in working with and supporting the new NIST standards for Quantum Safe operation on embedded systems
+
+| NIST Reference | Description |
+| ------ | --------------- |
+| FIPS203 | intended as the primary standard for general encryption. Among its advantages are comparatively small encryption keys that two parties can exchange easily, as well as its speed of operation. The standard is based on the CRYSTALS-Kyber algorithm, which has been renamed ML-KEM, short for Module-Lattice-Based Key-Encapsulation Mechanism.| |
+| FIPS204 | intended as the primary standard for protecting digital signatures. The standard uses the CRYSTALS-Dilithium algorithm, which has been renamed ML-DSA, short for Module-Lattice-Based Digital Signature Algorithm.| |
+| FIPS205 | also designed for digital signatures. The standard employs the Sphincs+ algorithm, which has been renamed SLH-DSA, short for Stateless Hash-Based Digital Signature Algorithm. The standard is based on a different math approach than ML-DSA, and it is intended as a backup method in case ML-DSA proves vulnerable.
+| |
+| FIPS206 (unreleased) | Similarly, when the draft FIPS 206 standard built around FALCON is released, the algorithm will be dubbed FN-DSA, short for FFT (fast-Fourier transform) over NTRU-Lattice-Based Digital Signature Algorithm. | |
+
+ref: https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards
 
 ## Open Quantum Safe Support
 
@@ -24,7 +40,7 @@ It should also build and run on other target boards supported by Yocto. If you u
 To enable the library in your build image (and optionally the tests) add this layer to your `conf/bblayers.conf`
 
 ```
-BSPLAYERS += " \
+BBLAYERS += " \
   ${OEROOT}/layers/meta-quantum-safe \
 "
 ```
@@ -32,12 +48,30 @@ BSPLAYERS += " \
 Then add the `liboqs` recipe to your image.
 
 ```
-CORE_IMAGE_BASE_INSTALL += " \
-   liboqs \
-"
+IMAGE_INSTALL:append = " liboqs"
+```
+
+This layer defaults to a pinned, stable `liboqs` recipe version (currently `0.15.0`). You can override this in your `local.conf` (and keep `liboqs-ptest` aligned), e.g.:
+
+```
+PREFERRED_VERSION_liboqs = "0.15.0"   # also supported: "0.10.1", "git"
+PREFERRED_VERSION_liboqs-ptest = "0.15.0"
+```
+
+CI currently builds/tests `liboqs` versions `0.10.1`, `0.15.0`, and `git`.
+
+If you use the provided Sato-based sample images (e.g. `core-image-qs.bb`), ensure your build includes the `meta-sato` layer (it is part of Poky, but may not be enabled in minimal setups).
+
+`liboqs` OpenSSL support is controlled via `PACKAGECONFIG`:
+
+```
+# Disable OpenSSL support (minimal builds)
+PACKAGECONFIG:pn-liboqs = ""
 ```
 
 You can also add the `liboqs` package tests which will run the tests from upstream on the device. To do this you'll need to enable ptest support in your build and include the `liboqs-ptest` package. Something like this:
+
+Note: the `liboqs-ptest` runtime dependencies (pytest, etc.) are typically provided by `meta-openembedded` (notably `meta-python`), so ensure those layers are enabled if you want to run ptests.
 
 Set `IMAGE_CLASSES` in your `local.conf`
 
@@ -2641,3 +2675,9 @@ Alex J Lennon <ajlennon@dynamicdevices.co.uk>
 Note that this repository is licensed under the MIT license.
 
 `libOQS` is also licensed under the MIT license but sub-components are licensed under other licenses. For further details on this please see [here](https://openquantumsafe.org/liboqs/license.html)
+
+In this layer, the `liboqs` recipe reflects this by declaring a combined license set (MIT plus licenses from bundled implementations such as Apache-2.0 / CC0-1.0 / BSD-3-Clause) and by referencing representative license texts via `LIC_FILES_CHKSUM` per pinned upstream version.
+
+---
+
+Maintained with the assistance of Cursor.ai.
