@@ -1,0 +1,39 @@
+header:
+  version: 18
+
+machine: qemux86-64
+distro: poky
+target: test-image-qs
+
+repos:
+  meta-quantum-safe:
+    # Clone from the local workspace checkout (relative to KAS_WORK_DIR when using the README commands).
+    url: ../..
+    path: meta-quantum-safe
+    branch: kirkstone
+    layers:
+      .:
+
+  poky:
+    url: https://git.yoctoproject.org/poky.git
+    commit: c942cdb0572ab065a13424aa7482404269ff9554
+    layers:
+      meta:
+      meta-poky:
+      meta-yocto-bsp:
+
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded.git
+    commit: 7d4507f226bd2af939d4482fb14a809867ece939
+    layers:
+      meta-oe:
+      meta-python:
+
+local_conf_header:
+  meta-quantum-safe: |
+    IMAGE_CLASSES += "testimage"
+    INHERIT += "rm_work"
+
+    PREFERRED_VERSION_liboqs = "0.15.0"
+    PREFERRED_VERSION_liboqs-ptest = "0.15.0"
+

@@ -1,0 +1,40 @@
+header:
+  version: 18
+
+machine: qemux86-64
+distro: poky
+target: test-image-qs
+
+repos:
+  meta-quantum-safe:
+    # Clone from the local workspace checkout (relative to KAS_WORK_DIR when using the README commands).
+    url: ../..
+    path: meta-quantum-safe
+    branch: whinlatter
+    layers:
+      .:
+
+  # Note: poky does not currently publish a whinlatter branch; we pin to master at the CI SHA.
+  poky:
+    url: https://git.yoctoproject.org/poky.git
+    commit: 485d9c126adad5764cca8d27fb437be7855b484a
+    layers:
+      meta:
+      meta-poky:
+      meta-yocto-bsp:
+
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded.git
+    commit: c6849e7529727a2c9eca0f9220836bd0d69ce086
+    layers:
+      meta-oe:
+      meta-python:
+
+local_conf_header:
+  meta-quantum-safe: |
+    IMAGE_CLASSES += "testimage"
+    INHERIT += "rm_work"
+
+    PREFERRED_VERSION_liboqs = "0.15.0"
+    PREFERRED_VERSION_liboqs-ptest = "0.15.0"
+
