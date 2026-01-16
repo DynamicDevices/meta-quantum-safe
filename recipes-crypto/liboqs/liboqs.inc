@@ -14,6 +14,7 @@ ORG="open-quantum-safe"
 BRANCH="0.10.1-release"
 SRC_URI = "git://github.com/${ORG}/liboqs.git;protocol=https;branch=${BRANCH} \
 	   file://run-ptest \
+	   file://qs-capability-check.py \
            file://01-check-installed-library.patch \
 "
 
@@ -32,6 +33,8 @@ inherit pkgconfig cmake ptest
 do_install_ptest() {
     install -d ${D}${PTEST_PATH} ${D}${PTEST_PATH}/build
     install -m 0755 ${WORKDIR}/run-ptest ${D}${PTEST_PATH}/run-ptest
+    install -m 0755 ${WORKDIR}/qs-capability-check.py ${D}${PTEST_PATH}/qs-capability-check.py
+    echo "${PV}" > ${D}${PTEST_PATH}/meta-quantum-safe-liboqs-version.txt
 
     cp -r --no-preserve=ownership ${B}/include ${D}${PTEST_PATH}/build/
     cp -r --no-preserve=ownership ${S}/src ${D}${PTEST_PATH}/
