@@ -1,0 +1,37 @@
+header:
+  version: 14
+
+machine: qemux86-64
+distro: poky
+target: test-image-qs
+build_dir: build-kas/scarthgap
+
+repos:
+  meta-quantum-safe:
+    path: ../
+
+  poky:
+    url: https://git.yoctoproject.org/poky.git
+    refspec: 72983ac391008ebceb45edc7a8f0f6d5f4fe715c
+    layers:
+      meta:
+      meta-poky:
+      meta-yocto-bsp:
+
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded.git
+    refspec: 2b26d30fc7f478f5735d514f0c1bc28f6a4148b6
+    layers:
+      meta-oe:
+      meta-python:
+
+local_conf_header:
+  meta-quantum-safe: |
+    # Keep ptests enabled in the produced image
+    IMAGE_CLASSES += "testimage"
+    INHERIT += "rm_work"
+
+    # Keep liboqs and liboqs-ptest aligned
+    PREFERRED_VERSION_liboqs = "0.15.0"
+    PREFERRED_VERSION_liboqs-ptest = "0.15.0"
+
