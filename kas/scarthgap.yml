@@ -7,7 +7,10 @@ target: test-image-qs
 
 repos:
   meta-quantum-safe:
-    path: ../
+    # Clone from the local workspace checkout (relative to KAS_WORK_DIR when using the README commands).
+    url: ../..
+    path: meta-quantum-safe
+    branch: scarthgap
     layers:
       .:
 

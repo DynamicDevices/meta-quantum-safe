@@ -36,5 +36,6 @@ KAS_WORK_DIR="$PWD/build-kas/whinlatter" kas build kas/whinlatter.yml
 
 - Use `KAS_WORK_DIR` to keep separate build directories per release so you can switch without clobbering.
 - Revisions for `poky` and `meta-openembedded` are pinned to match `.github/ci-pins.json`.
+- `meta-quantum-safe` is cloned from your local checkout into `KAS_WORK_DIR` (so uncommitted changes in your working tree are not picked up; commit them first if you need to test them).
 - Target image: `test-image-qs` (includes `liboqs` + `liboqs-ptest` and is suitable for `testimage`).
 
