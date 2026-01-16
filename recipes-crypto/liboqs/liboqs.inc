@@ -1,9 +1,14 @@
 FILESEXTRAPATHS:prepend = "${THISDIR}/${PN}:"
 
 DESCRIPTION = "C library for prototyping and experimenting with quantum-resistant cryptography"
+SUMMARY = "C library for prototyping and experimenting with quantum-resistant cryptography"
 SECTION = "crypto"
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=4b93ef2da47496727a4e8a59f443844e"
+HOMEPAGE = "https://openquantumsafe.org/"
+CVE_PRODUCT = "liboqs"
+
+# liboqs vendors multiple upstream implementations; licensing is a combination.
+# Per-version recipes define LIC_FILES_CHKSUM to point at representative license texts present in that release.
+LICENSE = "MIT & Apache-2.0 & CC0-1.0"
 
 ORG="open-quantum-safe"
 BRANCH="0.10.1-release"
@@ -23,8 +28,6 @@ S = "${WORKDIR}/git"
 DEPENDS += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', 'openssl', '', d)}"
 
 inherit pkgconfig cmake ptest
-
-PTEST_ENABLED = "1"
 
 do_install_ptest() {
     install -d ${D}${PTEST_PATH} ${D}${PTEST_PATH}/build

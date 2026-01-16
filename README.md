@@ -2676,6 +2676,8 @@ Note that this repository is licensed under the MIT license.
 
 `libOQS` is also licensed under the MIT license but sub-components are licensed under other licenses. For further details on this please see [here](https://openquantumsafe.org/liboqs/license.html)
 
+In this layer, the `liboqs` recipe reflects this by declaring a combined license set (MIT plus licenses from bundled implementations such as Apache-2.0 / CC0-1.0 / BSD-3-Clause) and by referencing representative license texts via `LIC_FILES_CHKSUM` per pinned upstream version.
+
 ---
 
 Maintained with the assistance of Cursor.ai.
