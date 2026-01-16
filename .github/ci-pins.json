@@ -1,0 +1,21 @@
+{
+  "kirkstone": {
+    "poky_ref": "kirkstone",
+    "poky_sha": "c942cdb0572ab065a13424aa7482404269ff9554",
+    "meta_openembedded_ref": "kirkstone",
+    "meta_openembedded_sha": "7d4507f226bd2af939d4482fb14a809867ece939"
+  },
+  "scarthgap": {
+    "poky_ref": "scarthgap",
+    "poky_sha": "72983ac391008ebceb45edc7a8f0f6d5f4fe715c",
+    "meta_openembedded_ref": "scarthgap",
+    "meta_openembedded_sha": "2b26d30fc7f478f5735d514f0c1bc28f6a4148b6"
+  },
+  "whinlatter": {
+    "poky_ref": "master",
+    "poky_sha": "485d9c126adad5764cca8d27fb437be7855b484a",
+    "meta_openembedded_ref": "whinlatter",
+    "meta_openembedded_sha": "c6849e7529727a2c9eca0f9220836bd0d69ce086"
+  }
+}
+

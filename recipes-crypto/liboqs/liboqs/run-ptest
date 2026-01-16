@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e
+
+./qs-capability-check.py
 
 python3 -m pytest --verbose --numprocesses=auto -t 2000 --ignore=scripts/copy_from_upstream/repos
 
