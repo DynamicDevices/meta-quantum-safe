@@ -6,8 +6,10 @@ A Yocto layer to start exploring the world of quantum safe cryptography
 
 | Branch | Support Status* | Status of Build & Tests |
 | ------ | --------------- | ----------------------- |
-| scarthgap | 	Long Term Support (until Apr. 2028) | [![scarthgap](https://img.shields.io/github/actions/workflow/status/dynamicdevices/meta-quantum-safe/CI_github.yml?branch=main&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml) |
-| kirkstone | 	Long Term Support (minimum Apr. 2026)	 | [![master](https://img.shields.io/github/actions/workflow/status/dynamicdevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml) |
+| main | Integration branch (builds scarthgap) | [![main](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=main&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Amain) |
+| kirkstone | Long Term Support (LTS) | [![kirkstone](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Akirkstone) |
+| scarthgap | Long Term Support (until Apr. 2028) | [![scarthgap](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=scarthgap&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Ascarthgap) |
+| whinlatter | Supported (non-LTS) | [![whinlatter](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=whinlatter&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Awhinlatter) |
 
 *support status as of 14/09/24, follows main Yocto release support schedule [here](https://wiki.yoctoproject.org/wiki/Releases)
 
@@ -48,6 +50,15 @@ Then add the `liboqs` recipe to your image.
 ```
 IMAGE_INSTALL:append = " liboqs"
 ```
+
+This layer defaults to a pinned, stable `liboqs` recipe version (currently `0.15.0`). You can override this in your `local.conf` (and keep `liboqs-ptest` aligned), e.g.:
+
+```
+PREFERRED_VERSION_liboqs = "0.15.0"   # also supported: "0.10.1", "git"
+PREFERRED_VERSION_liboqs-ptest = "0.15.0"
+```
+
+CI currently builds/tests `liboqs` versions `0.10.1`, `0.15.0`, and `git`.
 
 If you use the provided Sato-based sample images (e.g. `core-image-qs.bb`), ensure your build includes the `meta-sato` layer (it is part of Poky, but may not be enabled in minimal setups).
 
