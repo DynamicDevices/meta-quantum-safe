@@ -31,7 +31,7 @@ ref: https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finaliz
 
 We currently have support for the Open Quantum Safe project library [implementation](https://openquantumsafe.org)
 
-The intent is to next add OpenSSL and MQTT support in the near future to enable simple examples for testing quantum-safe algorithms end-to-end across the internet.
+The intent is to next add quantum-safe TLS (OpenSSL provider / `oqs-provider`) and MQTT support in the near future to enable simple examples for testing quantum-safe algorithms end-to-end across the internet.
 
 `libOQS` builds and runs on our Jaguar i.MX8M Mini based board and some performance statistics can be seen from the tool `speed_sig`.
 
