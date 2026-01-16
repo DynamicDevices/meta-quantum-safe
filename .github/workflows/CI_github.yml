@@ -5,8 +5,9 @@ on:
     paths-ignore:
       - 'README.md'
     branches:
-      - main
+      - kirkstone
       - scarthgap
+      - whinlatter
   pull_request:
 
 jobs:
@@ -19,19 +20,20 @@ jobs:
     strategy:
       matrix:
         liboqs_version: [0.10.1, git]
-        branch: [scarthgap]
         arch: [x86-64, arm64]
     env:
       name: build-and-test
       LIBOQS_VERSION: ${{ matrix.liboqs_version }}
       ARCH: ${{ matrix.arch }}
-      BRANCH: ${{ matrix.branch }}
+      # For PRs, build/test the target Yocto release branch (base_ref).
+      # For pushes, build/test the branch being pushed to (ref_name).
+      BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
     steps:
     - name: Checkout meta-quantum-safe
       uses: actions/checkout@v4
       with:
         clean: false
-        path: ${{ matrix.branch }}/meta-quantum-safe
+        path: ${{ env.BRANCH }}/meta-quantum-safe
     - name: Update repo poky
       run: |
         if [ ! -d ${BRANCH}/poky ]; then
@@ -88,15 +90,15 @@ jobs:
     - name: Store artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: test-image-qs-${{ matrix.branch }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
-        path: ./${{ matrix.branch }}/build/tmp/deploy/images/qemu${{ matrix.arch }}/
+        name: test-image-qs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
+        path: ./${{ env.BRANCH }}/build/tmp/deploy/images/qemu${{ matrix.arch }}/
     - name: Store logs
       uses: actions/upload-artifact@v4
       with:
-        name: logs-${{ matrix.branch }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
-        path: ./${{ matrix.branch }}/build/*.log
+        name: logs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
+        path: ./${{ env.BRANCH }}/build/*.log
     - name: Store test logs
       uses: actions/upload-artifact@v4
       with:
-        name: test-logs-${{ matrix.branch }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
-        path: ./${{ matrix.branch }}/build/tmp/work/test-image-qs/1.0/temp/log.do_testimage
+        name: test-logs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
+        path: ./${{ env.BRANCH }}/build/tmp/work/test-image-qs/1.0/temp/log.do_testimage
