@@ -44,7 +44,7 @@ jobs:
         set -euo pipefail
         PINS_FILE="$GITHUB_WORKSPACE/${WORKDIR}/meta-quantum-safe/.github/ci-pins.json"
         if [ -f "$PINS_FILE" ]; then
-          python3 -c 'import json,os,sys; branch=os.environ["BRANCH"]; pins_file=os.environ["PINS_FILE"]; pins=json.load(open(pins_file,"r",encoding="utf-8")); entry=pins.get(branch); entry is not None or (print(f"No pins for branch={branch} in {pins_file}", file=sys.stderr) or sys.exit(0)); f=open(os.environ["GITHUB_ENV"],"a",encoding="utf-8"); f.write(f"POKY_REF={entry[\"poky_ref\"]}\\n"); f.write(f"POKY_SHA={entry[\"poky_sha\"]}\\n"); f.write(f"META_OE_REF={entry[\"meta_openembedded_ref\"]}\\n"); f.write(f"META_OE_SHA={entry[\"meta_openembedded_sha\"]}\\n"); f.close(); print(f"Pinned {branch}: poky {entry[\"poky_ref\"]}@{entry[\"poky_sha\"]}, meta-openembedded {entry[\"meta_openembedded_ref\"]}@{entry[\"meta_openembedded_sha\"]}")'
+          python3 -c 'import json,os,sys; branch=os.environ["BRANCH"]; pins_file=os.environ["PINS_FILE"]; pins=json.load(open(pins_file,"r",encoding="utf-8")); entry=pins.get(branch); entry or (print("No pins for branch=%s in %s" % (branch, pins_file), file=sys.stderr) or sys.exit(0)); f=open(os.environ["GITHUB_ENV"],"a",encoding="utf-8"); f.write("POKY_REF=%s\\n" % entry["poky_ref"]); f.write("POKY_SHA=%s\\n" % entry["poky_sha"]); f.write("META_OE_REF=%s\\n" % entry["meta_openembedded_ref"]); f.write("META_OE_SHA=%s\\n" % entry["meta_openembedded_sha"]); f.close(); print("Pinned %s: poky %s@%s, meta-openembedded %s@%s" % (branch, entry["poky_ref"], entry["poky_sha"], entry["meta_openembedded_ref"], entry["meta_openembedded_sha"]))'
         else
           echo "No pins file found at $PINS_FILE (continuing unpinned)"
         fi
