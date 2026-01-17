@@ -52,6 +52,7 @@ jobs:
         PINS_FILE: ${{ github.workspace }}/${{ env.WORKDIR }}/meta-quantum-safe/.github/ci-pins.json
     - name: Update repo poky
       run: |
+        mkdir -p ${WORKDIR}
         if [ ! -d ${WORKDIR}/poky ]; then
           git clone git://git.yoctoproject.org/poky -b ${POKY_REF:-${BRANCH}} ${WORKDIR}/poky
         else
@@ -67,6 +68,7 @@ jobs:
         fi
     - name: Update repo meta-openembedded
       run: |
+        mkdir -p ${WORKDIR}
         if [ ! -d ${WORKDIR}/meta-openembedded ]; then
           git clone https://github.com/openembedded/meta-openembedded.git -b ${META_OE_REF:-${BRANCH}} ${WORKDIR}/meta-openembedded
         else
@@ -82,6 +84,15 @@ jobs:
         fi
     - name: Configuring
       run: |
+        if [ ! -f ${WORKDIR}/poky/oe-init-build-env ]; then
+          echo "ERROR: missing ${WORKDIR}/poky/oe-init-build-env"
+          echo "PWD=$(pwd)"
+          echo "Listing ${WORKDIR}:"
+          ls -la ${WORKDIR} || true
+          echo "Listing work/:"
+          ls -la work || true
+          exit 1
+        fi
         rm -f ${WORKDIR}/build/conf/local.conf
         rm -f ${WORKDIR}/build/conf/bblayers.conf
         . ./${WORKDIR}/poky/oe-init-build-env ${WORKDIR}/build
