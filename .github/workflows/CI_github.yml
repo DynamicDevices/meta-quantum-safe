@@ -52,11 +52,13 @@ jobs:
         PINS_FILE: ${{ github.workspace }}/${{ env.WORKDIR }}/meta-quantum-safe/.github/ci-pins.json
     - name: Update repo poky
       run: |
+        set -euo pipefail
         mkdir -p ${WORKDIR}
         if [ ! -d ${WORKDIR}/poky ]; then
           git clone git://git.yoctoproject.org/poky -b ${POKY_REF:-${BRANCH}} ${WORKDIR}/poky
         else
           cd ${WORKDIR}/poky
+          git sparse-checkout disable || true
           git fetch origin ${POKY_REF:-${BRANCH}}
           git reset --hard FETCH_HEAD
           cd ../../..
@@ -66,13 +68,27 @@ jobs:
           git checkout -q ${POKY_SHA}
           cd ../../..
         fi
+        # Some runners have persistent workspaces; if an old sparse checkout or partial state
+        # causes oe-init-build-env to be missing, reclone cleanly.
+        if [ ! -f ${WORKDIR}/poky/oe-init-build-env ]; then
+          echo "WARNING: ${WORKDIR}/poky/oe-init-build-env missing after update; recloning poky"
+          rm -rf ${WORKDIR}/poky
+          git clone git://git.yoctoproject.org/poky -b ${POKY_REF:-${BRANCH}} ${WORKDIR}/poky
+          if [ -n "${POKY_SHA:-}" ]; then
+            cd ${WORKDIR}/poky
+            git checkout -q ${POKY_SHA}
+            cd ../../..
+          fi
+        fi
     - name: Update repo meta-openembedded
       run: |
+        set -euo pipefail
         mkdir -p ${WORKDIR}
         if [ ! -d ${WORKDIR}/meta-openembedded ]; then
           git clone https://github.com/openembedded/meta-openembedded.git -b ${META_OE_REF:-${BRANCH}} ${WORKDIR}/meta-openembedded
         else
           cd ${WORKDIR}/meta-openembedded
+          git sparse-checkout disable || true
           git fetch origin ${META_OE_REF:-${BRANCH}}
           git reset --hard FETCH_HEAD
           cd ../../..
