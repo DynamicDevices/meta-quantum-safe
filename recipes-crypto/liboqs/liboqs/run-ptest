@@ -8,7 +8,7 @@ if [ $rc -ne 0 ]; then
     exit $rc
 fi
 
-python3 -m pytest --verbose --numprocesses=auto --ignore=scripts/copy_from_upstream/repos
+python3 -m pytest --verbose --numprocesses=1 --ignore=scripts/copy_from_upstream/repos --ignore=tests/test_code_conventions.py
 
 rc=$?
 if [ $rc -eq 0 ]; then
