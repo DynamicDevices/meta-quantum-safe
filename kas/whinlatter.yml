@@ -14,10 +14,10 @@ repos:
     layers:
       .:
 
-  # Note: poky does not currently publish a whinlatter branch; we pin to master at the CI SHA.
+  # Note: poky does not currently publish a whinlatter branch; we pin to walnascar at the CI SHA.
   poky:
     url: https://git.yoctoproject.org/poky.git
-    commit: 485d9c126adad5764cca8d27fb437be7855b484a
+    commit: d0b46a6624ec9c61c47270745dd0b2d5abbe6ac1
     layers:
       meta:
       meta-poky:
