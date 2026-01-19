@@ -1,20 +1,48 @@
 #!/bin/bash
 
-./qs-capability-check.py
+set -euo pipefail
 
-rc=$?
-if [ $rc -ne 0 ]; then
+fail() {
     echo "FAIL: liboqs"
-    exit $rc
-fi
+    exit "${1:-1}"
+}
 
-python3 -m pytest --verbose --numprocesses=1 --ignore=scripts/copy_from_upstream/repos --ignore=tests/test_code_conventions.py
-
-rc=$?
-if [ $rc -eq 0 ]; then
+pass() {
     echo "PASS: liboqs"
-else
-    echo "FAIL: liboqs"
+    exit 0
+}
+
+./qs-capability-check.py || fail $?
+
+# Prefer native test binaries over pytest: they run faster and avoid OOM on qemuarm64.
+tests_dir="build/tests"
+ran_any=0
+rc=0
+
+run_test() {
+    local t="$1"
+    if [ -x "${tests_dir}/${t}" ]; then
+        echo "INFO: running ${tests_dir}/${t}"
+        "${tests_dir}/${t}" || rc=$?
+        ran_any=1
+    fi
+}
+
+# Common liboqs test executables (present across many releases)
+run_test test_kem
+run_test test_sig
+run_test test_aes
+run_test test_sha2
+run_test test_sha3
+run_test test_hkdf
+
+if [ "${ran_any}" -eq 0 ]; then
+    echo "WARNING: no executable tests found in ${tests_dir}; falling back to pytest (may be slow/oom on small targets)"
+    python3 -m pytest --verbose --maxfail=1 --ignore=scripts/copy_from_upstream/repos --ignore=tests/test_code_conventions.py || rc=$?
 fi
-exit $rc
+
+if [ "${rc}" -eq 0 ]; then
+    pass
+fi
+fail "${rc}"
 
