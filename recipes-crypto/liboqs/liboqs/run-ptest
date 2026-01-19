@@ -14,6 +14,12 @@ pass() {
 
 ./qs-capability-check.py || fail $?
 
+# Basic diagnostics to make CI failures actionable
+echo "INFO: uname: $(uname -a || true)"
+echo "INFO: liboqs ptest dir: $(pwd)"
+echo "INFO: python3: $(command -v python3 || echo MISSING)"
+python3 --version 2>/dev/null || true
+
 # Prefer native test binaries over pytest: they run faster and avoid OOM on qemuarm64.
 tests_dir="build/tests"
 ran_any=0
@@ -23,8 +29,18 @@ run_test() {
     local t="$1"
     if [ -x "${tests_dir}/${t}" ]; then
         echo "INFO: running ${tests_dir}/${t}"
-        "${tests_dir}/${t}" || rc=$?
+        # Ensure the dynamic linker can find liboqs and we have a writable temp dir
+        (export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:${LD_LIBRARY_PATH:-}"; export TMPDIR=/tmp; cd "${tests_dir}"; "./${t}")
+        local this_rc=$?
+        if [ "${this_rc}" -ne 0 ]; then
+            echo "ERROR: ${t} exited ${this_rc}"
+            echo "INFO: ldd ./${t} (may fail on musl):"
+            (cd "${tests_dir}" && ldd "./${t}") || true
+            rc="${this_rc}"
+        fi
         ran_any=1
+    else
+        echo "INFO: skipping missing ${tests_dir}/${t}"
     fi
 }
 
