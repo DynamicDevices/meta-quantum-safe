@@ -44,9 +44,29 @@ run_test() {
     fi
 }
 
+# Some liboqs test binaries require arguments (and exit non-zero if omitted).
+run_test_args() {
+    local t="$1"; shift
+    if [ -x "${tests_dir}/${t}" ]; then
+        echo "INFO: running ${tests_dir}/${t} $*"
+        (export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:${LD_LIBRARY_PATH:-}"; export TMPDIR=/tmp; cd "${tests_dir}"; "./${t}" "$@")
+        local this_rc=$?
+        if [ "${this_rc}" -ne 0 ]; then
+            echo "ERROR: ${t} exited ${this_rc}"
+            echo "INFO: ldd ./${t} (may fail on musl):"
+            (cd "${tests_dir}" && ldd "./${t}") || true
+            rc="${this_rc}"
+        fi
+        ran_any=1
+    else
+        echo "INFO: skipping missing ${tests_dir}/${t}"
+    fi
+}
+
 # Common liboqs test executables (present across many releases)
-run_test test_kem
-run_test test_sig
+# test_kem/test_sig require an algorithm name argument; choose widely-supported ones.
+run_test_args test_kem Kyber512
+run_test_args test_sig ML-DSA-44 0 0 0
 run_test test_aes
 run_test test_sha2
 run_test test_sha3
