@@ -66,7 +66,8 @@ run_test_args() {
 # Common liboqs test executables (present across many releases)
 # test_kem/test_sig require an algorithm name argument; choose widely-supported ones.
 run_test_args test_kem Kyber512
-run_test_args test_sig ML-DSA-44 0 0 0
+# Note: some liboqs versions only accept a single algname arg here; keep it portable.
+run_test_args test_sig ML-DSA-44
 run_test test_aes
 run_test test_sha2
 run_test test_sha3
