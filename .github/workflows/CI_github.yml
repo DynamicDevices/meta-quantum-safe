@@ -38,6 +38,15 @@ jobs:
       with:
         clean: false
         path: ${{ env.WORKDIR }}/meta-quantum-safe
+    - name: Sanity check workspace (no merge conflict markers)
+      shell: bash
+      run: |
+        set -euo pipefail
+        LAYER_DIR="$GITHUB_WORKSPACE/${WORKDIR}/meta-quantum-safe"
+        if grep -R -n -E '^(<<<<<<<|=======|>>>>>>>)' "$LAYER_DIR" ; then
+          echo "ERROR: merge conflict markers detected in $LAYER_DIR"
+          exit 1
+        fi
     - name: Load CI pins (poky/meta-openembedded)
       shell: bash
       run: |
