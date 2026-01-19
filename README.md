@@ -13,7 +13,7 @@ A Yocto layer to start exploring the world of quantum safe cryptography
 
 *support status as of 14/09/24, follows main Yocto release support schedule [here](https://wiki.yoctoproject.org/wiki/Releases)
 
-Note: the `whinlatter` CI job currently builds against **poky `master`** (pinned) because poky does not currently publish a `whinlatter` branch; `meta-openembedded` does publish `whinlatter`.
+Note: the `whinlatter` CI job currently builds against **poky `walnascar`** (pinned) because poky does not currently publish a `whinlatter` branch; `meta-openembedded` does publish `whinlatter`.
 
 ## NIST Standards
 
