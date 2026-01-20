@@ -9,12 +9,6 @@ fail() {
 
 pass() {
     echo "PASS: liboqs"
-<<<<<<< HEAD
-else
-    echo "FAIL: liboqs"
-fi
-exit $rc
-=======
     exit 0
 }
 
@@ -161,5 +155,3 @@ if [ "${rc}" -eq 0 ]; then
     pass
 fi
 fail "${rc}"
-
->>>>>>> main
