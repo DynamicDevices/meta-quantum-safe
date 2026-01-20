@@ -5,10 +5,10 @@ on:
     paths-ignore:
       - 'README.md'
     branches:
-      - scarthgap
+      - kirkstone
   pull_request:
     branches:
-      - scarthgap
+      - kirkstone
 
 jobs:
   build-and-test:
@@ -27,8 +27,8 @@ jobs:
       name: build-and-test
       LIBOQS_VERSION: ${{ matrix.liboqs_version }}
       ARCH: ${{ matrix.arch }}
-      BRANCH: scarthgap
-      WORKDIR: work/scarthgap-${{ matrix.arch }}-${{ matrix.liboqs_version }}
+      BRANCH: kirkstone
+      WORKDIR: work/kirkstone-${{ matrix.arch }}-${{ matrix.liboqs_version }}
     steps:
     - name: Checkout meta-quantum-safe
       uses: actions/checkout@v4
