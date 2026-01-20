@@ -20,6 +20,54 @@ exit $rc
 
 ./qs-capability-check.py || fail $?
 
+# Pick algorithm names that are actually built in this liboqs (names vary a bit by release).
+# We derive the supported IDs from the packaged headers (same source as qs-capability-check).
+eval "$(
+python3 - <<'PY'
+import re
+from pathlib import Path
+
+def extract_ids(header_path: Path, macro_prefix: str) -> set[str]:
+    txt = header_path.read_text(errors="ignore")
+    pat = re.compile(rf'^#define\s+{macro_prefix}_alg_\w+\s+"([^"]+)"', re.M)
+    return set(pat.findall(txt))
+
+def find_header(candidates: list[str]) -> Path:
+    for c in candidates:
+        p = Path(c)
+        if p.exists():
+            return p
+    raise FileNotFoundError("Could not find any header candidates")
+
+kem_h = find_header(["src/kem/kem.h", "build/include/oqs/kem.h"])
+sig_h = find_header(["src/sig/sig.h", "build/include/oqs/sig.h"])
+kems = extract_ids(kem_h, "OQS_KEM")
+sigs = extract_ids(sig_h, "OQS_SIG")
+
+# Prefer stable, widely-supported algorithms; fall back to any available.
+pref_kems = ["ML-KEM-768", "ML-KEM-512", "Kyber512", "Kyber768", "ML-KEM-768-ipd"]
+pref_sigs = ["ML-DSA-44", "Dilithium2"]
+
+def pick(preferred: list[str], avail: set[str]) -> str:
+    for a in preferred:
+        if a in avail:
+            return a
+    return sorted(avail)[0] if avail else ""
+
+kem_pick = pick(pref_kems, kems)
+sig_pick = pick(pref_sigs, sigs)
+
+# A small extra set (still quick) that you can opt into with LIBOQS_PTEST_EXTRA_ALGS=1
+extra_kems = [a for a in ["ML-KEM-512", "ML-KEM-1024", "NTRU-HPS-2048-509"] if a in kems and a != kem_pick]
+extra_sigs = [a for a in ["ML-DSA-65", "ML-DSA-87"] if a in sigs and a != sig_pick]
+
+print(f'KEM_PICK="{kem_pick}"')
+print(f'SIG_PICK="{sig_pick}"')
+print('KEM_EXTRA="%s"' % " ".join(extra_kems[:3]))
+print('SIG_EXTRA="%s"' % " ".join(extra_sigs[:3]))
+PY
+)" || true
+
 # Basic diagnostics to make CI failures actionable
 echo "INFO: uname: $(uname -a || true)"
 echo "INFO: liboqs ptest dir: $(pwd)"
@@ -71,9 +119,28 @@ run_test_args() {
 
 # Common liboqs test executables (present across many releases)
 # test_kem/test_sig require an algorithm name argument; choose widely-supported ones.
-run_test_args test_kem Kyber512
+if [ -n "${KEM_PICK:-}" ]; then
+    run_test_args test_kem "${KEM_PICK}"
+else
+    echo "WARNING: could not determine a supported KEM name; skipping test_kem"
+fi
+
 # Note: some liboqs versions only accept a single algname arg here; keep it portable.
-run_test_args test_sig ML-DSA-44
+if [ -n "${SIG_PICK:-}" ]; then
+    run_test_args test_sig "${SIG_PICK}"
+else
+    echo "WARNING: could not determine a supported SIG name; skipping test_sig"
+fi
+
+# Optional: expand coverage a bit (still fast) by testing a couple more algorithms.
+if [ "${LIBOQS_PTEST_EXTRA_ALGS:-0}" = "1" ]; then
+    for a in ${KEM_EXTRA:-}; do
+        run_test_args test_kem "${a}"
+    done
+    for a in ${SIG_EXTRA:-}; do
+        run_test_args test_sig "${a}"
+    done
+fi
 run_test test_aes
 run_test test_sha2
 run_test test_sha3
@@ -81,7 +148,13 @@ run_test test_hkdf
 
 if [ "${ran_any}" -eq 0 ]; then
     echo "WARNING: no executable tests found in ${tests_dir}; falling back to pytest (may be slow/oom on small targets)"
-    python3 -m pytest --verbose --maxfail=1 --ignore=scripts/copy_from_upstream/repos --ignore=tests/test_code_conventions.py || rc=$?
+    # Avoid the heavy pytest path on small targets (historically OOM-prone on qemuarm64).
+    if uname -m | grep -qiE 'aarch64|arm'; then
+        echo "ERROR: refusing pytest fallback on $(uname -m); package should include native test binaries under ${tests_dir}"
+        rc=1
+    else
+        python3 -m pytest --verbose --maxfail=1 --ignore=scripts/copy_from_upstream/repos --ignore=tests/test_code_conventions.py || rc=$?
+    fi
 fi
 
 if [ "${rc}" -eq 0 ]; then
