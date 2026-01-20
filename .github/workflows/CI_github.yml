@@ -193,11 +193,16 @@ jobs:
         path: |
           ./${{ env.WORKDIR }}/build/conf/local.conf
           ./${{ env.WORKDIR }}/build/conf/bblayers.conf
-          ./${{ env.WORKDIR }}/build/tmp/log/**
-          ./${{ env.WORKDIR }}/build/tmp/**/console-latest.log
-          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.do_*
-          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/run.do_*
-          ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.task_order
+          # Keep uploads small: these are the most useful high-level logs.
+          ./${{ env.WORKDIR }}/build/tmp/log/cooker/**
+          ./${{ env.WORKDIR }}/build/tmp/log/oeqa/**
+          # And only include task logs for recipes from *this* layer (avoid Yocto-wide noise).
+          ./${{ env.WORKDIR }}/build/tmp/work/**/liboqs/**/temp/log.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/liboqs/**/temp/run.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/liboqs/**/temp/log.task_order
+          ./${{ env.WORKDIR }}/build/tmp/work/**/test-image-qs/**/temp/log.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/test-image-qs/**/temp/run.do_*
+          ./${{ env.WORKDIR }}/build/tmp/work/**/test-image-qs/**/temp/log.task_order
     - name: Store test logs
       uses: actions/upload-artifact@v4
       if: success()
