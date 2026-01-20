@@ -44,4 +44,6 @@ do_install_ptest() {
     cp -r --no-preserve=ownership ${B}/tests ${D}${PTEST_PATH}/build/
 }
 
-RDEPENDS:${PN}-ptest += "bash python3 python3-pyyaml python3-pytest python3-pytest-forked python3-pytest-xdist binutils"
+# Keep ptest runtime deps minimal so older release branches don't need meta-python.
+# Our run-ptest uses python3 for lightweight header parsing and capability checks.
+RDEPENDS:${PN}-ptest += "bash python3 binutils"

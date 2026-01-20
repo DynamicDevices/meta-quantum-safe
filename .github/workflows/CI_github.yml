@@ -144,8 +144,8 @@ jobs:
         echo "liboqs version: $LIBOQS_VERSION"
 
         echo "BBLAYERS += '$GITHUB_WORKSPACE/${WORKDIR}/meta-quantum-safe'" >> conf/bblayers.conf
-        echo "BBLAYERS += '$GITHUB_WORKSPACE/${WORKDIR}/meta-openembedded/meta-oe'" >> conf/bblayers.conf
-        echo "BBLAYERS += '$GITHUB_WORKSPACE/${WORKDIR}/meta-openembedded/meta-python'" >> conf/bblayers.conf
+        # Keep whinlatter CI lean and compatible: avoid pulling in meta-openembedded/meta-python
+        # (can introduce parse issues unrelated to this layer).
 
         echo "MACHINE=\"qemu${ARCH}\"" >> conf/local.conf
         # Give QEMU enough RAM for ptests (ptest-pkgs can be heavy).

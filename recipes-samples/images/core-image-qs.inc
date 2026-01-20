@@ -4,7 +4,6 @@
 # which significantly increases runtime and can introduce unrelated failures.
 
 IMAGE_INSTALL += "\
-        python3-pyyaml \
         ptest-runner \
         liboqs \
         liboqs-ptest \
