@@ -5,11 +5,10 @@ on:
     paths-ignore:
       - 'README.md'
     branches:
-      - main
-      - kirkstone
       - scarthgap
-      - whinlatter
   pull_request:
+    branches:
+      - scarthgap
 
 jobs:
   build-and-test:
@@ -21,17 +20,14 @@ jobs:
       options: --privileged --platform linux/amd64  -v /dev/net/tun:/dev/net/tun -v /dev/kvm:/dev/kvm
     strategy:
       matrix:
-        liboqs_version: [0.10.1, 0.15.0, git]
-        arch: [x86-64, arm64]
+        liboqs_version: [0.15.0]
+        arch: [x86-64]
     env:
       name: build-and-test
       LIBOQS_VERSION: ${{ matrix.liboqs_version }}
       ARCH: ${{ matrix.arch }}
-      # For PRs, build/test the target Yocto release branch (base_ref).
-      # For pushes, build/test the branch being pushed to (ref_name).
-      # Treat 'main' as an integration branch that builds/tests against scarthgap.
-      BRANCH: ${{ (github.event_name == 'pull_request' && github.base_ref || github.ref_name) == 'main' && 'scarthgap' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}
-      WORKDIR: work/${{ (github.event_name == 'pull_request' && github.base_ref || github.ref_name) == 'main' && 'scarthgap' || (github.event_name == 'pull_request' && github.base_ref || github.ref_name) }}-${{ matrix.arch }}-${{ matrix.liboqs_version }}
+      BRANCH: scarthgap
+      WORKDIR: work/scarthgap-${{ matrix.arch }}-${{ matrix.liboqs_version }}
     steps:
     - name: Checkout meta-quantum-safe
       uses: actions/checkout@v4
