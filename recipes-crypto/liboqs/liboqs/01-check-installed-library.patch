@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [Yocto-specific: tests should validate the installed liboqs in the target image]
+
 diff --git a/tests/test_binary.py b/tests/test_binary.py
 index 53e114df..4e295c5c 100644
 --- a/tests/test_binary.py
