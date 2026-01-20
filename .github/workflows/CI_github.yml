@@ -178,13 +178,13 @@ jobs:
         bitbake test-image-qs -c testimage
     - name: Store artifacts
       uses: actions/upload-artifact@v4
-      if: always()
+      if: success()
       with:
         name: test-image-qs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
         path: ./${{ env.WORKDIR }}/build/tmp/deploy/images/qemu${{ matrix.arch }}/
     - name: Store logs
       uses: actions/upload-artifact@v4
-      if: always()
+      if: success()
       with:
         name: logs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
         path: |
@@ -197,7 +197,7 @@ jobs:
           ./${{ env.WORKDIR }}/build/tmp/work/**/temp/log.task_order
     - name: Store test logs
       uses: actions/upload-artifact@v4
-      if: always()
+      if: success()
       with:
         name: test-logs-${{ env.BRANCH }}-${{ matrix.liboqs_version }}-${{ github.sha }}-${{ matrix.arch }}
         path: |
