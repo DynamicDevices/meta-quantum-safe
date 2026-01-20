@@ -39,8 +39,9 @@ jobs:
       run: |
         set -euo pipefail
         LAYER_DIR="$GITHUB_WORKSPACE/${WORKDIR}/meta-quantum-safe"
-        # Only scan tracked files to avoid false positives from .git/binary content.
-        if git -C "$LAYER_DIR" grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- . ; then
+        # Only scan tracked files, and only match the unambiguous conflict markers.
+        # NOTE: '=======' is too common in docs/log output to be a reliable signal on its own.
+        if git -C "$LAYER_DIR" grep -n -E '^(<<<<<<<|>>>>>>>)' -- . ; then
           echo "ERROR: merge conflict markers detected in tracked files under $LAYER_DIR"
           exit 1
         fi
