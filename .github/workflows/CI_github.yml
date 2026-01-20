@@ -147,9 +147,12 @@ jobs:
         echo "BBLAYERS += '$GITHUB_WORKSPACE/${WORKDIR}/meta-openembedded/meta-python'" >> conf/bblayers.conf
 
         echo "MACHINE=\"qemu${ARCH}\"" >> conf/local.conf
-        # Give qemuarm64 enough RAM to avoid OOM during ptests (python/pytest is memory-hungry).
+        # Give QEMU enough RAM for ptests (ptest-pkgs can be heavy).
         if [ "${ARCH}" = "arm64" ]; then
-          echo "QB_MEM:qemuarm64 = \"-m 512\"" >> conf/local.conf
+          echo "QB_MEM:qemuarm64 = \"-m 1024\"" >> conf/local.conf
+        fi
+        if [ "${ARCH}" = "x86-64" ]; then
+          echo "QB_MEM:qemux86-64 = \"-m 2048\"" >> conf/local.conf
         fi
         echo "DL_DIR=\"$GITHUB_WORKSPACE/downloads\"" >> conf/local.conf
         echo "SSTATE_DIR=\"$GITHUB_WORKSPACE/sstate-cache\"" >> conf/local.conf
