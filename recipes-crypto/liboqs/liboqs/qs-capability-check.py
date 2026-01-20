@@ -34,9 +34,17 @@ def main() -> int:
     kems = _extract_ids(kem_h, "OQS_KEM")
     sigs = _extract_ids(sig_h, "OQS_SIG")
 
-    # Always-on sanity (should hold across versions)
-    required_kems = {"ML-KEM-768"}
-    required_sigs = {"ML-DSA-44"}
+    # Version-aware sanity:
+    # - 0.10.1 uses older identifiers (e.g. ML-KEM-768-ipd, Dilithium2)
+    # - 0.15.0 uses new ML-* identifiers (e.g. ML-KEM-768, ML-DSA-44)
+    required_kems: set[str]
+    required_sigs: set[str]
+    if version.startswith("0.10.1"):
+        required_kems = {"ML-KEM-768-ipd"}
+        required_sigs = {"Dilithium2"}
+    else:
+        required_kems = {"ML-KEM-768"}
+        required_sigs = {"ML-DSA-44"}
 
     missing = []
     for k in sorted(required_kems):
