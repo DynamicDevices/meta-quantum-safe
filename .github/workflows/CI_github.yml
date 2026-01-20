@@ -19,9 +19,10 @@ jobs:
       image: dynamicdevices/yocto-ci-build@sha256:be170373625e77a6235a0bb3efb84d00be736221782d5d716e88aafd1b965794
       options: --privileged --platform linux/amd64  -v /dev/net/tun:/dev/net/tun -v /dev/kvm:/dev/kvm
     strategy:
+      max-parallel: 2
       matrix:
         liboqs_version: [0.10.1, 0.15.0]
-        arch: [x86-64]
+        arch: [x86-64, arm64]
     env:
       name: build-and-test
       LIBOQS_VERSION: ${{ matrix.liboqs_version }}
