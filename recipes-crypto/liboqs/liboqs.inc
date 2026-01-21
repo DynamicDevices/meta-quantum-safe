@@ -61,7 +61,15 @@ do_install_ptest() {
     cp -r --no-preserve=ownership ${S}/docs ${D}${PTEST_PATH}/
     cp -r --no-preserve=ownership ${S}/scripts ${D}${PTEST_PATH}/
     cp -r --no-preserve=ownership ${S}/tests ${D}${PTEST_PATH}/
-    cp -r --no-preserve=ownership ${B}/tests ${D}${PTEST_PATH}/build/
+    # Don't ship the entire CMake build tree for tests (e.g. CMakeFiles/, cmake_install.cmake),
+    # as it contains TMPDIR/build path references and triggers do_package_qa [buildpaths].
+    # We only need the compiled test executables for ptest runtime.
+    install -d ${D}${PTEST_PATH}/build/tests
+    if [ -d "${B}/tests" ]; then
+        for f in $(find "${B}/tests" -maxdepth 1 -type f -perm /111 2>/dev/null); do
+            install -m 0755 "${f}" ${D}${PTEST_PATH}/build/tests/
+        done
+    fi
 }
 
 # Keep ptest runtime deps minimal so older release branches don't need meta-python.
