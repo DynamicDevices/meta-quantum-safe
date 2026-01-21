@@ -31,14 +31,29 @@ DEPENDS += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', 'openssl', '', d)}"
 inherit pkgconfig cmake ptest
 
 do_install_ptest() {
-    # Newer Yocto releases stage file:// artifacts under ${UNPACKDIR} (e.g. sources-unpack),
-    # while older releases may still have them directly under ${WORKDIR}.
-    # Use a single, version-agnostic source dir for our ptest helper scripts.
-    srcdir="${UNPACKDIR:-${WORKDIR}}"
-
     install -d ${D}${PTEST_PATH} ${D}${PTEST_PATH}/build
-    install -m 0755 ${srcdir}/run-ptest ${D}${PTEST_PATH}/run-ptest
-    install -m 0755 ${srcdir}/qs-capability-check.py ${D}${PTEST_PATH}/qs-capability-check.py
+
+    # Version/branch compatibility:
+    # - some releases define ${UNPACKDIR} for file:// payloads
+    # - some stage them under ${WORKDIR}/sources-unpack
+    # - older ones may place them directly in ${WORKDIR}
+    _find_payload() {
+        payload="$1"
+        for d in "${UNPACKDIR:-}" "${WORKDIR}/sources-unpack" "${WORKDIR}"; do
+            [ -n "${d}" ] || continue
+            if [ -f "${d}/${payload}" ]; then
+                echo "${d}/${payload}"
+                return 0
+            fi
+        done
+        return 1
+    }
+
+    run_ptest="$(_find_payload run-ptest)" || bbfatal "Missing run-ptest payload (checked UNPACKDIR, WORKDIR/sources-unpack, WORKDIR)"
+    cap_check="$(_find_payload qs-capability-check.py)" || bbfatal "Missing qs-capability-check.py payload (checked UNPACKDIR, WORKDIR/sources-unpack, WORKDIR)"
+
+    install -m 0755 "${run_ptest}" ${D}${PTEST_PATH}/run-ptest
+    install -m 0755 "${cap_check}" ${D}${PTEST_PATH}/qs-capability-check.py
     echo "${PV}" > ${D}${PTEST_PATH}/meta-quantum-safe-liboqs-version.txt
 
     cp -r --no-preserve=ownership ${B}/include ${D}${PTEST_PATH}/build/
