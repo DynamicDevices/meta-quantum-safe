@@ -31,9 +31,14 @@ DEPENDS += "${@bb.utils.contains('PACKAGECONFIG', 'openssl', 'openssl', '', d)}"
 inherit pkgconfig cmake ptest
 
 do_install_ptest() {
+    # Newer Yocto releases stage file:// artifacts under ${UNPACKDIR} (e.g. sources-unpack),
+    # while older releases may still have them directly under ${WORKDIR}.
+    # Use a single, version-agnostic source dir for our ptest helper scripts.
+    srcdir="${UNPACKDIR:-${WORKDIR}}"
+
     install -d ${D}${PTEST_PATH} ${D}${PTEST_PATH}/build
-    install -m 0755 ${WORKDIR}/run-ptest ${D}${PTEST_PATH}/run-ptest
-    install -m 0755 ${WORKDIR}/qs-capability-check.py ${D}${PTEST_PATH}/qs-capability-check.py
+    install -m 0755 ${srcdir}/run-ptest ${D}${PTEST_PATH}/run-ptest
+    install -m 0755 ${srcdir}/qs-capability-check.py ${D}${PTEST_PATH}/qs-capability-check.py
     echo "${PV}" > ${D}${PTEST_PATH}/meta-quantum-safe-liboqs-version.txt
 
     cp -r --no-preserve=ownership ${B}/include ${D}${PTEST_PATH}/build/
