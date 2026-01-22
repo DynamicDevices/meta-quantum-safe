@@ -43,6 +43,8 @@ if [ ! -e "${modules_dir}/oqsprovider.so" ] && [ ! -e "${modules_dir}/oqsprovide
 fi
 
 echo "INFO: OPENSSL_MODULES=${modules_dir}"
+# Some OpenSSL builds also consult OPENSSL_MODULES env var.
+export OPENSSL_MODULES="${modules_dir}"
 
 providers_out="$(
     openssl list -providers \
@@ -57,33 +59,42 @@ if ! echo "${providers_out}" | grep -qi "oqsprovider"; then
     fail 1
 fi
 
-# Pick a signature algorithm that oqsprovider actually exposes in this build.
-# Names vary slightly across oqs-provider/liboqs versions, so try a small preference list.
 sig_list="$(
     openssl list -signature-algorithms \
         -provider-path "${modules_dir}" \
         -provider oqsprovider \
-        -provider default 2>/dev/null || true
+        -provider default 2>&1 || true
 )"
+echo "INFO: openssl list -signature-algorithms (oqsprovider) output:"
+echo "${sig_list}"
 
-pick_sig_alg() {
-    local preferred=("$@")
-    local a
-    for a in "${preferred[@]}"; do
-        if echo "${sig_list}" | grep -qiE "(^|[[:space:]])${a}([[:space:]]|$)"; then
-            echo "${a}"
-            return 0
-        fi
-    done
-    # Fallback: take the first token on the first non-empty line.
-    echo "${sig_list}" | awk 'NF{print $1; exit}'
-}
+# Pick a working signature algorithm by trial. This avoids relying on the
+# formatting/contents of `openssl list` output, which varies by OpenSSL version.
+SIGALG=""
+for cand in \
+    mldsa44 mldsa65 mldsa87 \
+    ML-DSA-44 ML-DSA-65 ML-DSA-87 \
+    dilithium2 dilithium3 dilithium5 \
+    Dilithium2 Dilithium3 Dilithium5 \
+    falcon512 falcon1024 \
+    Falcon512 Falcon1024 \
+; do
+    rm -f /tmp/oqsprovider-sk.pem 2>/dev/null || true
+    if openssl genpkey \
+        -provider-path "${modules_dir}" \
+        -provider oqsprovider \
+        -provider default \
+        -algorithm "${cand}" \
+        -out /tmp/oqsprovider-sk.pem >/tmp/oqsprovider-genpkey.out 2>&1; then
+        SIGALG="${cand}"
+        break
+    fi
+done
 
-SIGALG="$(pick_sig_alg dilithium2 Dilithium2 ML-DSA-44 dilithium3 Dilithium3)"
 if [ -z "${SIGALG}" ]; then
-    echo "ERROR: could not determine any signature algorithm from oqsprovider"
-    echo "INFO: openssl list -signature-algorithms output:"
-    echo "${sig_list}"
+    echo "ERROR: could not generate a PQ key with oqsprovider using any known algorithm name."
+    echo "INFO: last genpkey output:"
+    tail -n 200 /tmp/oqsprovider-genpkey.out 2>/dev/null || true
     fail 1
 fi
 echo "INFO: using signature algorithm: ${SIGALG}"
@@ -93,12 +104,7 @@ trap 'rm -rf "${tmpdir}"' EXIT
 
 echo "hello oqs-provider" > "${tmpdir}/msg.bin"
 
-openssl genpkey \
-    -provider-path "${modules_dir}" \
-    -provider oqsprovider \
-    -provider default \
-    -algorithm "${SIGALG}" \
-    -out "${tmpdir}/sk.pem" || fail $?
+cp -f /tmp/oqsprovider-sk.pem "${tmpdir}/sk.pem"
 
 openssl pkey -in "${tmpdir}/sk.pem" -pubout -out "${tmpdir}/pk.pem" || fail $?
 

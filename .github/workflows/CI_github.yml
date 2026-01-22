@@ -190,9 +190,20 @@ jobs:
         bitbake -k test-image-qs
     - name: Testing
       run: |
+        set -euo pipefail
         . ./${WORKDIR}/poky/oe-init-build-env ${WORKDIR}/build
         export TERM=linux
-        bitbake test-image-qs -c testimage
+        if ! bitbake test-image-qs -c testimage; then
+          echo "ERROR: bitbake test-image-qs -c testimage failed; dumping log.do_testimage*"
+          # Print the relevant do_testimage logs directly into the Actions log for debugging
+          find "${WORKDIR}/build/tmp/work" -path "*/test-image-qs/*/temp/log.do_testimage*" -type f -maxdepth 10 2>/dev/null | sort || true
+          for f in $(find "${WORKDIR}/build/tmp/work" -path "*/test-image-qs/*/temp/log.do_testimage*" -type f -maxdepth 10 2>/dev/null | sort); do
+            echo "----- BEGIN ${f} -----"
+            tail -n 400 "${f}" || true
+            echo "----- END ${f} -----"
+          done
+          exit 1
+        fi
     - name: Store artifacts
       uses: actions/upload-artifact@v4
       if: success()
