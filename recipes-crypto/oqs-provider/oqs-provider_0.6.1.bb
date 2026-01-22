@@ -11,7 +11,9 @@ LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=ab9b4308908ace39992d3080dd26824a"
 SRC_URI = "git://github.com/open-quantum-safe/oqs-provider.git;protocol=https;branch=main \
            file://run-ptest \
           "
-SRCREV = "848b4e6abaa89e769c4db46ca78f91000f67ca52"
+
+# Tag 0.6.1: compatible with liboqs 0.10.1 (doesn't reference newer OQS_SIG IDs like mayo/cross/uov).
+SRCREV = "c4130ea3ae14f8adfb08235d0d7c5c5a3470666b"
 
 S = "${WORKDIR}/git"
 
