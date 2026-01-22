@@ -1,0 +1,34 @@
+From: meta-quantum-safe CI <ci@dynamicdevices.co.uk>
+Date: Thu, 22 Jan 2026 00:00:00 +0000
+Subject: [PATCH] cmake: respect OPENSSL_MODULES_PATH override
+
+Older oqs-provider releases (e.g. 0.6.1) unconditionally set
+OPENSSL_MODULES_PATH based on the sysroot libcrypto path, which makes Yocto
+installs land under sysroot-derived paths and prevents packaging.
+
+Allow OPENSSL_MODULES_PATH to be overridden (as a CMake cache variable), and
+only compute a default when it is not provided.
+
+Upstream-Status: Inappropriate [Yocto-specific install path handling]
+
+---
+ CMakeLists.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8d0b7b8..be5e3c1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -64,7 +64,8 @@ cmake_path(APPEND OQS_MODULES_PARENT_PATH "ossl-modules" OUTPUT_VARIABLE OPENSSL_
+ else()
+ get_filename_component(OPENSSL_LIB_DIR ${OPENSSL_CRYPTO_LIBRARY} DIRECTORY)
+-set(OPENSSL_MODULES_PATH ${OPENSSL_LIB_DIR}/ossl-modules)
++if(NOT DEFINED OPENSSL_MODULES_PATH)
++    set(OPENSSL_MODULES_PATH ${OPENSSL_LIB_DIR}/ossl-modules CACHE PATH "Path to OpenSSL modules")
++endif()
+ endif()
+ 
+ # Add required include for liboqs
+-- 
+2.34.1
+
