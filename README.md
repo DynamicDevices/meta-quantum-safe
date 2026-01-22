@@ -17,7 +17,7 @@ Primary focus today:
 | Branch | Support status* | CI status |
 | --- | --- | --- |
 | `main` | Integration branch (development) | [![main](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=main&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Amain) |
-| `kirkstone` | LTS | [![kirkstone](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Akirkstone) |
+| `kirkstone` | LTS (until Apr 2026) | [![kirkstone](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Akirkstone) |
 | `scarthgap` | LTS (until Apr 2028) | [![scarthgap](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=scarthgap&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Ascarthgap) |
 | `whinlatter` | Supported (non-LTS) | [![whinlatter](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=whinlatter&label=build%20%26%20test)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Awhinlatter) |
 
