@@ -6,8 +6,11 @@
 IMAGE_INSTALL += "\
         python3-pyyaml \
         ptest-runner \
+        openssl \
         liboqs \
         liboqs-ptest \
+        oqs-provider \
+        oqs-provider-ptest \
 "
 
 DEFAULT_TEST_SUITES:pn-${PN} = "ssh ping ptest"

@@ -1,0 +1,110 @@
+#!/bin/bash
+
+set -euo pipefail
+
+fail() {
+    echo "FAIL: oqs-provider"
+    exit "${1:-1}"
+}
+
+pass() {
+    echo "PASS: oqs-provider"
+    exit 0
+}
+
+echo "INFO: uname: $(uname -a || true)"
+echo "INFO: ptest dir: $(pwd)"
+
+if ! command -v openssl >/dev/null 2>&1; then
+    echo "ERROR: openssl command not found"
+    fail 1
+fi
+
+openssl version || true
+
+modules_dir=""
+for d in /usr/lib/ossl-modules /usr/lib64/ossl-modules; do
+    if [ -d "$d" ]; then
+        modules_dir="$d"
+        break
+    fi
+done
+
+if [ -z "${modules_dir}" ]; then
+    echo "ERROR: could not find OpenSSL module directory (/usr/lib*/ossl-modules)"
+    fail 1
+fi
+
+if [ ! -e "${modules_dir}/oqsprovider.so" ] && [ ! -e "${modules_dir}/oqsprovider.dll" ]; then
+    echo "ERROR: oqsprovider module not found in ${modules_dir}"
+    echo "INFO: contents of ${modules_dir}:"
+    ls -la "${modules_dir}" || true
+    fail 1
+fi
+
+echo "INFO: OPENSSL_MODULES=${modules_dir}"
+
+providers_out="$(
+    openssl list -providers \
+        -provider-path "${modules_dir}" \
+        -provider oqsprovider \
+        -provider default 2>&1 || true
+)"
+echo "${providers_out}"
+
+if ! echo "${providers_out}" | grep -qi "oqsprovider"; then
+    echo "ERROR: oqsprovider did not load (output above)"
+    fail 1
+fi
+
+# Pick a signature algorithm that oqsprovider actually exposes in this build.
+# Names vary slightly across oqs-provider/liboqs versions, so try a small preference list.
+sig_list="$(
+    openssl list -signature-algorithms \
+        -provider-path "${modules_dir}" \
+        -provider oqsprovider \
+        -provider default 2>/dev/null || true
+)"
+
+pick_sig_alg() {
+    local preferred=("$@")
+    local a
+    for a in "${preferred[@]}"; do
+        if echo "${sig_list}" | grep -qiE "(^|[[:space:]])${a}([[:space:]]|$)"; then
+            echo "${a}"
+            return 0
+        fi
+    done
+    # Fallback: take the first token on the first non-empty line.
+    echo "${sig_list}" | awk 'NF{print $1; exit}'
+}
+
+SIGALG="$(pick_sig_alg dilithium2 Dilithium2 ML-DSA-44 dilithium3 Dilithium3)"
+if [ -z "${SIGALG}" ]; then
+    echo "ERROR: could not determine any signature algorithm from oqsprovider"
+    echo "INFO: openssl list -signature-algorithms output:"
+    echo "${sig_list}"
+    fail 1
+fi
+echo "INFO: using signature algorithm: ${SIGALG}"
+
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "${tmpdir}"' EXIT
+
+echo "hello oqs-provider" > "${tmpdir}/msg.bin"
+
+openssl genpkey \
+    -provider-path "${modules_dir}" \
+    -provider oqsprovider \
+    -provider default \
+    -algorithm "${SIGALG}" \
+    -out "${tmpdir}/sk.pem" || fail $?
+
+openssl pkey -in "${tmpdir}/sk.pem" -pubout -out "${tmpdir}/pk.pem" || fail $?
+
+openssl pkeyutl -sign -inkey "${tmpdir}/sk.pem" -in "${tmpdir}/msg.bin" -out "${tmpdir}/sig.bin" || fail $?
+
+openssl pkeyutl -verify -pubin -inkey "${tmpdir}/pk.pem" -in "${tmpdir}/msg.bin" -sigfile "${tmpdir}/sig.bin" || fail $?
+
+pass
+
