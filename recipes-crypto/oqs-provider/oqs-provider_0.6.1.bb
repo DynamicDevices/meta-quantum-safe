@@ -9,7 +9,6 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=ab9b4308908ace39992d3080dd26824a"
 
 SRC_URI = "git://github.com/open-quantum-safe/oqs-provider.git;protocol=https;branch=main \
-           file://0001-cmake-respect-OPENSSL_MODULES_PATH.patch \
            file://run-ptest \
           "
 
