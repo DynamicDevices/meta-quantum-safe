@@ -163,6 +163,17 @@ jobs:
         echo "PREFERRED_VERSION_liboqs=\"${LIBOQS_VERSION}\"" >> conf/local.conf
         echo "PREFERRED_VERSION_liboqs-ptest=\"${LIBOQS_VERSION}\"" >> conf/local.conf
 
+        # oqs-provider needs to be compatible with the selected liboqs.
+        # Newer oqs-provider releases may reference newer liboqs algorithm IDs (e.g. Mayo/CROSS/UOV),
+        # which are not present in older liboqs releases like 0.10.1.
+        if [ "${LIBOQS_VERSION}" = "0.10.1" ]; then
+          echo "PREFERRED_VERSION_oqs-provider=\"0.6.1\"" >> conf/local.conf
+          echo "PREFERRED_VERSION_oqs-provider-ptest=\"0.6.1\"" >> conf/local.conf
+        else
+          echo "PREFERRED_VERSION_oqs-provider=\"0.11.0\"" >> conf/local.conf
+          echo "PREFERRED_VERSION_oqs-provider-ptest=\"0.11.0\"" >> conf/local.conf
+        fi
+
         echo "INHERIT += \" rm_work \"" >> conf/local.conf
         sed -i 's/#IMAGE_CLASSES += "testimage testsdk"/IMAGE_CLASSES += "testimage "/' conf/local.conf
     - name: License QA (populate_lic)
