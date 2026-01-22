@@ -199,8 +199,8 @@ jobs:
         if ! bitbake test-image-qs -c testimage; then
           echo "ERROR: bitbake test-image-qs -c testimage failed; dumping log.do_testimage*"
           # Print the relevant do_testimage logs directly into the Actions log for debugging
-          find "${WORKDIR}/build/tmp/work" -path "*/test-image-qs/*/temp/log.do_testimage*" -type f -maxdepth 10 2>/dev/null | sort || true
-          for f in $(find "${WORKDIR}/build/tmp/work" -path "*/test-image-qs/*/temp/log.do_testimage*" -type f -maxdepth 10 2>/dev/null | sort); do
+          find "${WORKDIR}/build/tmp/work" -maxdepth 10 -type f -path "*/test-image-qs/*/temp/log.do_testimage*" 2>/dev/null | sort || true
+          for f in $(find "${WORKDIR}/build/tmp/work" -maxdepth 10 -type f -path "*/test-image-qs/*/temp/log.do_testimage*" 2>/dev/null | sort); do
             echo "----- BEGIN ${f} -----"
             tail -n 400 "${f}" || true
             echo "----- END ${f} -----"
