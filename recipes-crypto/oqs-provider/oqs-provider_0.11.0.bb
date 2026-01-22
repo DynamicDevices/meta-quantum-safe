@@ -21,6 +21,15 @@ DEPENDS = "openssl liboqs"
 
 inherit cmake pkgconfig ptest
 
+# The provider module installs as an unversioned `.so` under `ossl-modules/`,
+# so make it an explicit runtime package. Also allow the main package to be
+# empty (it can just depend on the module package), otherwise it may not be
+# emitted and rootfs (dnf) won't find `oqs-provider`.
+PACKAGES += "${PN}-module"
+FILES:${PN}-module = "${libdir}/ossl-modules/*"
+RDEPENDS:${PN} += "${PN}-module"
+ALLOW_EMPTY:${PN} = "1"
+
 # Ensure the provider installs to the *target* module dir (not a sysroot-derived path).
 EXTRA_OECMAKE = " \
     -DBUILD_SHARED_LIBS=ON \
@@ -35,7 +44,7 @@ do_install_ptest() {
 }
 
 # The module lives under OpenSSL's module directory, which isn't in default FILES for ${PN}.
-FILES:${PN} += "${libdir}/ossl-modules/*"
+# (Packaged via ${PN}-module above.)
 
 RDEPENDS:${PN}-ptest += "bash openssl"
 
