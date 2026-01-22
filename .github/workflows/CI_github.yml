@@ -6,9 +6,11 @@ on:
       - 'README.md'
     branches:
       - main
+      - scarthgap
   pull_request:
     branches:
       - main
+      - scarthgap
 
 jobs:
   build-and-test:
