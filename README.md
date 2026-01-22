@@ -1,5 +1,10 @@
 # meta-quantum-safe
 
+[![CI main](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=main&label=CI%20main)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Amain)
+[![CI scarthgap](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=scarthgap&label=CI%20scarthgap)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Ascarthgap)
+[![CI kirkstone](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=kirkstone&label=CI%20kirkstone)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Akirkstone)
+[![CI whinlatter](https://img.shields.io/github/actions/workflow/status/DynamicDevices/meta-quantum-safe/CI_github.yml?branch=whinlatter&label=CI%20whinlatter)](https://github.com/DynamicDevices/meta-quantum-safe/actions/workflows/CI_github.yml?query=branch%3Awhinlatter)
+
 A Yocto/OpenEmbedded layer for experimenting with **post-quantum (quantum-safe) cryptography** on embedded Linux targets.
 
 Primary focus today:
